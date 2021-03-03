@@ -1,4 +1,3 @@
-{% load rest_framework %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,15 +5,18 @@
     <title>Title</title>
 </head>
 {% block content %}
-    <div>
-        {% for i in parlement %}
-            <button>
-                {% for j,k in i.items %}
-                    {{ k }}
-                {% endfor %}
-            </button>
+{#    <form method="post">{% csrf_token %}#}
+    {% for i in parlement %}
+        <div>
+            <a href="{% url 'membres_parlement' pk=i.id %}">
+                <button>
+                    {{ i.Nom }}
+                    {{ i.Description }}
+                </button>
+            </a>
             <br>
-        {% endfor %}
-    </div>
+        </div>
+    {% endfor %}
+{#    </form>#}
 {% endblock %}
 </html>
