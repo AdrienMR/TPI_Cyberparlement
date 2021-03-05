@@ -19,8 +19,8 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('parlement/', views.StartView.as_view(), name='parlement'),
-    path('parlement/detail/<int:pk>', views.DetailView.as_view(), name='membres_parlement'),
+    path('parlement/', views.ParlementListeView.as_view(), name='parlement'),
+    path('parlement/detail/<int:pk>', views.ParlementDetailView.as_view(), name='membres_parlement'),
     path('parlement/detail/modif/<int:pk>', views.ModifMemberView.as_view(), name='modif_membre'),
     # path('', Index.as_view(), name='test'),
 ]

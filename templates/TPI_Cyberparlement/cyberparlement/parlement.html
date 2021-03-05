@@ -1,0 +1,21 @@
+{#{% extends 'base.html' %}#}
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% load static %}
+{% block content %}
+    {#    <form method="post">{% csrf_token %}#}
+    {% for parlement in parlements %}
+        <div>
+            <a href="{% url 'membres_parlement' pk=parlement.idcyberparlement %}">
+                <button class="btn btn-primary">
+                    {{ parlement.nom }}
+                    <br>
+                    {{ parlement.description }}
+                </button>
+                <br>
+            </a>
+        </div>
+    {% endfor %}
+    </form>
+{% endblock %}
+</html>

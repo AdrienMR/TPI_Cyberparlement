@@ -7,9 +7,8 @@
 <body>
 <div>
     {% for i in personne %}
-        {% if i != 'idPersonne' or 'Password' or 'Statut' %}
-            {{ i }}
-            tdh
+        {% if i != 'idPersonne' %}
+             <input type="text">{{ i }}</input>
         {% endif %}
     {% endfor %}
 </div>
