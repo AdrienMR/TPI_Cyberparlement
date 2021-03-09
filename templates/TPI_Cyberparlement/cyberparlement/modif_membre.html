@@ -1,0 +1,85 @@
+{#{% extends 'base.html' %}#}
+
+<body>
+<form method="post" name="put_user" action="test">
+{% csrf_token %}
+    <div>
+        {% for p in personne %}
+            <table>
+                <tr>
+                    <td>
+                        {{ p.nom }}
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Nouveau nom" name="nom" id="nom">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.prenom }}
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Nouveau prenom" name="prenom" id="prenom">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.email }}
+                    </td>
+                    <td>
+                        <input type="email" placeholder="Nouveau email" name="email" id="email">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.adresse }}
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Nouveau adresse" name="adresse" id="adresse">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.npa }}
+                    </td>
+                    <td>
+                        <input type="number" placeholder="Nouveau npa" name="npa" id="npa">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.localite }}
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Nouveau localité" name="localite" id="localite">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.datenaissance }}
+                    </td>
+                    <td>
+                        <input type="date" placeholder="Nouvelle date de naissance" name="datenaissance" id="datenaissance">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{ p.notel }}
+                    </td>
+                    <td>
+                        <input type="text" placeholder="Nouveau no de tel" name="notel" id="notel">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" value="Reset le password">
+                    </td>
+                </tr>
+            </table>
+            <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+            <input type="submit" value="Confirmer">
+        {% endfor %}
+    </div>
+</form>
+</body>
+</html>
