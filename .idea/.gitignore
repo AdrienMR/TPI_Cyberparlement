@@ -6,3 +6,5 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# Dossier tmp ou il y a les mails en mode local
+/tmp/
