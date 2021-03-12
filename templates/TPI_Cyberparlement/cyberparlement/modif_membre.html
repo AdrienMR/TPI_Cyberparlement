@@ -1,11 +1,12 @@
 {#{% extends 'base.html' %}#}
 
 <body>
-<form method="post" name="put_user" action="test">
-{% csrf_token %}
-    <div>
-        {% for p in personne %}
-            <table>
+
+<div>
+    {% for p in personne %}
+        <table>
+            <form method="post" name="put_user" action="confirm_changes">
+                {% csrf_token %}
                 <tr>
                     <td>
                         {{ p.nom }}
@@ -70,16 +71,21 @@
                         <input type="text" placeholder="Nouveau no de tel" name="notel" id="notel">
                     </td>
                 </tr>
+                <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+                <input type="submit" value="Confirmer">
+            </form>
+            <form method="post" name="reset_password" action="reset_password">
+                {% csrf_token %}
                 <tr>
                     <td>
-                        <input type="button" value="Reset le password">
+                        <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+                        <input type="hidden" name="check_password" id="check_password" value="{{ p.passwordcheck }}">
+                        <input type="submit" value="Reset le password">
                     </td>
                 </tr>
-            </table>
-            <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
-            <input type="submit" value="Confirmer">
-        {% endfor %}
-    </div>
-</form>
+            </form>
+        </table>
+    {% endfor %}
+</div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from django.http import HttpResponse
-from django.shortcuts import render
-import requests
-from django.urls import reverse_lazy
+import secrets
+import string
+from django.core.mail import send_mail
 from django.views.generic import TemplateView, ListView, DetailView
 
 from djangoProject.models import *
@@ -34,6 +34,7 @@ class ParlementDetailView(DetailView):
         test = []
         for m in membre:
             test.append(Personne.objects.filter(idpersonne=m.personne_id))
+
         return test
 
     def get_context_data(self, **kwargs):
@@ -48,12 +49,37 @@ def get_parlement_recursif(self, pk):
     for p in parlement:
         print(p.cpparent)
         all_parlement.append(p.cpparent)
-        if p.cpparent is not 1:
+        if p.cpparent != 1:
             get_parlement_recursif(self, p.cpparent)
             return all_parlement.count()
         else:
             break
 
+
+def mail_password(request):
+    if request.method == 'POST':
+        personne = Personne.objects.filter(idpersonne=request.POST.get('id'))
+        for p in personne:
+            p.password = None
+            alphabet = string.ascii_letters + string.digits
+            password = ''.join(secrets.choice(alphabet) for i in range(8))
+            p.password_check = password
+            send_mail('code pour reset le passeword',
+                      f'Allez sur le lien pour réinitialiser votre password {password}',
+                      "rossier.adrien@bluewin.ch",
+                      ['adrienmatthieu.rossier@ceff.ch'],
+                      fail_silently=False, )
+            return password
+
+
+class Test(DetailView):
+    template_name = 'TPI_Cyberparlement/cyberparlement/Password.html'
+    model = Personne
+
+    def get_context_data(self, **kwargs):
+        context = super(Test, self).get_context_data()
+        context['test'] = mail_password(self)
+        return context
 
 
 class ModifMemberView(DetailView):
@@ -72,7 +98,8 @@ class ModifMemberView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['personne'] = self.get_perdonne_by_id(self)
-        context['parlement'] = self.get_parlement(self)
+        # context['parlement'] = self.get_parlement(self)
+        # context['test'] = reset_password()
         return context
 
 
@@ -81,12 +108,19 @@ def put_personne(request):
         data = request.POST
         personne = Personne.objects.filter(idpersonne=request.POST.get('id'))
         for p in personne:
-            p.nom = data['nom']
-            p.prenom = data['prenom']
-            p.email = data['email']
-            p.adresse = data['adresse']
-            p.npa = data['npa']
-            p.localite = data['localite']
-            p.datenaissance = data['datenaissance']
+            if data['nom']:
+                p.nom = data['nom']
+            if data['prenom']:
+                p.prenom = data['prenom']
+            if data['email']:
+                p.email = data['email']
+            if data['adresse']:
+                p.adresse = data['adresse']
+            if data['npa']:
+                p.npa = data['npa']
+            if data['localite']:
+                p.localite = data['localite']
+            if data['datenaissance']:
+                p.datenaissance = data['datenaissance']
             # p.save()
     return HttpResponse('Modifications effectués avec succes')

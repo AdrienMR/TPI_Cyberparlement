@@ -52,6 +52,16 @@
                         <button>Modifier</button>
                     </a>
                 </td>
+                <td>
+                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
+                        <button>Confirmé l'email</button>
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
+                        <button>Confirmer code postal</button>
+                    </a>
+                </td>
             </tr>
         </table>
         <br>
