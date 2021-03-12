@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, response
 import secrets
 import string
 from django.core.mail import send_mail
@@ -56,34 +56,49 @@ def get_parlement_recursif(self, pk):
             break
 
 
-def mail_password(request):
-    if request.method == 'POST':
-        personne = Personne.objects.filter(idpersonne=request.POST.get('id'))
+def test_recursive(pk):
+    all = []
+    pk = 8
+    parlement = Cyberparlement.objects.filter(idcyberparlement=pk)
+    for p in parlement:
+        if not all.__contains__(p.idcyberparlement):
+            all.append(p.idcyberparlement)
+        children = Cyberparlement.objects.filter(cpparent=p.idcyberparlement)
+        if not children:
+            for c in children:
+                test_recursive(c.idcyberparlement)
+    return True
+
+
+class Test(DetailView):
+    template_name = 'TPI_Cyberparlement/personne/Password.html'
+    model = Personne
+
+    def mail_password(self, pk):
+        personne = Personne.objects.filter(idpersonne=self.kwargs['pk'])
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(secrets.choice(alphabet) for i in range(8))
         for p in personne:
             p.password = None
-            alphabet = string.ascii_letters + string.digits
-            password = ''.join(secrets.choice(alphabet) for i in range(8))
+            p.password_check = None
             p.password_check = password
             send_mail('code pour reset le passeword',
                       f'Allez sur le lien pour réinitialiser votre password {password}',
                       "rossier.adrien@bluewin.ch",
                       ['adrienmatthieu.rossier@ceff.ch'],
                       fail_silently=False, )
+
             return password
-
-
-class Test(DetailView):
-    template_name = 'TPI_Cyberparlement/cyberparlement/Password.html'
-    model = Personne
 
     def get_context_data(self, **kwargs):
         context = super(Test, self).get_context_data()
-        context['test'] = mail_password(self)
+        context['test'] = self.mail_password(self)
+        print(context['test'])
         return context
 
 
 class ModifMemberView(DetailView):
-    template_name = 'TPI_Cyberparlement/cyberparlement/modif_membre.html'
+    template_name = 'TPI_Cyberparlement/personne/modif_membre.html'
     model = Personne
 
     def get_perdonne_by_id(self, pk):

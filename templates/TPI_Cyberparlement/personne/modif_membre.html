@@ -74,7 +74,7 @@
                 <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
                 <input type="submit" value="Confirmer">
             </form>
-            <form method="post" name="reset_password" action="reset_password">
+            <form method="post" name="reset_password" action="{% url 'reset_password' %}">
                 {% csrf_token %}
                 <tr>
                     <td>

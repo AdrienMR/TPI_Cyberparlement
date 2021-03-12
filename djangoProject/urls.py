@@ -23,5 +23,5 @@ urlpatterns = [
     path('parlement/detail/<int:pk>', views.ParlementDetailView.as_view(), name='membres_parlement'),
     path('parlement/detail/modif/<int:pk>', views.ModifMemberView.as_view(), name='modif_membre'),
     path('parlement/detail/modif/confirm_changes', views.put_personne, name='confirm_changes'),
-    path('parlement/detail/modif/reset_password', views.Test.as_view(), name='reset_password'),
+    path('parlement/detail/modif/reset_password/<int:pk>', views.Test.as_view(), name='reset_password'),
 ]
