@@ -129,7 +129,7 @@ class Personne(models.Model):
     adresse = models.CharField(db_column='Adresse', max_length=45, blank=True, null=True)  # Field name made lowercase.
     npa = models.IntegerField(db_column='NPA', blank=True, null=True)  # Field name made lowercase.
     localite = models.CharField(db_column='Localite', max_length=45)  # Field name made lowercase.
-    statut = models.ForeignKey('Statutpersonne', models.DO_NOTHING, db_column='Statut', blank=True, null=True)  # Field name made lowercase.
+    # statut = models.ForeignKey('Statutpersonne', models.DO_NOTHING, db_column='Statut', blank=True, null=True)  # Field name made lowercase.
     datenaissance = models.DateField(db_column='DateNaissance', blank=True, null=True)  # Field name made lowercase.
     notel = models.CharField(db_column='NoTel', max_length=45, blank=True, null=True)  # Field name made lowercase.
     password = models.CharField(db_column='Password', max_length=45, blank=True, null=True)  # Field name made lowercase.
@@ -168,7 +168,8 @@ class Statutinitiative(models.Model):
 
 
 class Statutpersonne(models.Model):
-    statuttexte = models.CharField(db_column='StatutTexte', primary_key=True, max_length=45)  # Field name made lowercase.
+    idstatut = models.AutoField(db_column='idStatutpersonne', primary_key=True)  # Field name made lowercase.
+    statut = models.CharField(db_column='Statut', blank=True, null=True, max_length=45)
 
     class Meta:
         managed = True

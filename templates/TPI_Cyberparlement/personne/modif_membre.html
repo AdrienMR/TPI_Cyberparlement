@@ -9,81 +9,96 @@
                 {% csrf_token %}
                 <tr>
                     <td>
-                        {{ p.nom }}
+                        Nom :
                     </td>
                     <td>
-                        <input type="text" placeholder="Nouveau nom" name="nom" id="nom">
+                        <input type="text" value="{{ p.nom }}" name="nom" id="nom">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.prenom }}
+                        Prénom :
                     </td>
                     <td>
-                        <input type="text" placeholder="Nouveau prenom" name="prenom" id="prenom">
+                        <input type="text" value="{{ p.prenom }}" name="prenom" id="prenom">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.email }}
+                        Email :
                     </td>
                     <td>
-                        <input type="email" placeholder="Nouveau email" name="email" id="email">
+                        <input type="email" value="{{ p.email }}" name="email" id="email">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.adresse }}
+                        Adresse :
                     </td>
                     <td>
-                        <input type="text" placeholder="Nouveau adresse" name="adresse" id="adresse">
+                        <input type="text" value="{{ p.adresse }}" name="adresse" id="adresse">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.npa }}
+                        Npa :
                     </td>
                     <td>
-                        <input type="number" placeholder="Nouveau npa" name="npa" id="npa">
+                        <input type="number" value="{{ p.npa }}" name="npa" id="npa">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.localite }}
+                        Localité :
                     </td>
                     <td>
-                        <input type="text" placeholder="Nouveau localité" name="localite" id="localite">
+                        <input type="text" value="{{ p.localite }}" name="localite" id="localite">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.datenaissance }}
+                        Date de naissance :
                     </td>
                     <td>
-                        <input type="date" placeholder="Nouvelle date de naissance" name="datenaissance" id="datenaissance">
+                        <input type="date" value="{{ p.datenaissance }}" name="datenaissance" id="datenaissance">
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {{ p.notel }}
+                        No tel :
                     </td>
                     <td>
-                        <input type="text" placeholder="Nouveau no de tel" name="notel" id="notel">
+                        <input type="text" value="{{ p.notel }}" name="notel" id="notel">
                     </td>
                 </tr>
-                <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
-                <input type="submit" value="Confirmer">
-            </form>
-            <form method="post" name="reset_password" action="{% url 'reset_password' %}">
-                {% csrf_token %}
                 <tr>
+                    <td>
+                        Statut : {{ p.statut }}
+                    </td>
+                    <td>
+                        <select name="statut">
+                            <option value="3"></option>
+                            <option value="0">Confirmé courrier</option>
+                            <option value="1">Inscrit</option>
+                            <option value="2">Validé email</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
                     <td>
                         <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
-                        <input type="hidden" name="check_password" id="check_password" value="{{ p.passwordcheck }}">
-                        <input type="submit" value="Reset le password">
+                        <input type="submit" value="Confirmer">
                     </td>
                 </tr>
             </form>
+            <tr>
+                <td>
+                    <a href="{% url 'reset_password' pk=p.idpersonne %}">
+                        <button>Réinitialiser le mot de passe</button>
+                    </a>
+                </td>
+            </tr>
         </table>
     {% endfor %}
 </div>

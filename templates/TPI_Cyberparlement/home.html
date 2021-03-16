@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+{#<form method="post" name="user" action="parlement/">#}
+{#    {% csrf_token %}#}
+{#    ID : <input type="text" name="currentUser" id="currentUser">#}
+{#    <input type="submit" value="Confirmer">#}
+{#</form>#}
+{#id : <input type="text" name="text">#}
+{#<a href="{% url 'parlement/' pk=5 %}">#}
+{#    <button>#}
+{#        sgeg#}
+{#    </button>#}
+{#</a>#}
+{% for p in personnes %}
+    {% for c in p %}
+        <a href="{% url 'parlement' pk=c.idpersonne %}">
+            <button>
+                {{ c.idpersonne }}
+                {{ c.nom }}
+                {{ c.prenom }}
+            </button>
+        </a>
+        <br>
+    {% endfor %}
+{% endfor %}
+</body>
+</html>

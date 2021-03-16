@@ -18,10 +18,13 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path('', views.LoginPage.as_view(), name='login'),
     path('admin/', admin.site.urls),
-    path('parlement/', views.ParlementListeView.as_view(), name='parlement'),
+    path('parlement/<int:pk>', views.ParlementListeView.as_view(), name='parlement'),
     path('parlement/detail/<int:pk>', views.ParlementDetailView.as_view(), name='membres_parlement'),
     path('parlement/detail/modif/<int:pk>', views.ModifMemberView.as_view(), name='modif_membre'),
     path('parlement/detail/modif/confirm_changes', views.put_personne, name='confirm_changes'),
-    path('parlement/detail/modif/reset_password/<int:pk>', views.Test.as_view(), name='reset_password'),
+    path('parlement/detail/modif/reset_password/<int:pk>', views.Password.as_view(), name='reset_password'),
+    path('parlement/detail/mail_conf/<int:pk>', views.MailConf.as_view(), name='mail_conf'),
+    path('parlement/detail/courrier_conf', views.courrier_conf, name='courrier_conf'),
 ]

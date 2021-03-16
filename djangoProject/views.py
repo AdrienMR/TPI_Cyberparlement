@@ -1,9 +1,11 @@
-from django.http import HttpResponse, response
+from django.http import HttpResponse, response, request, FileResponse, HttpRequest
 import secrets
 import string
 from django.core.mail import send_mail
+from django.core import serializers
 from django.views.generic import TemplateView, ListView, DetailView
-
+import io
+from reportlab.pdfgen import canvas
 from djangoProject.models import *
 
 
@@ -11,16 +13,17 @@ class ParlementListeView(ListView):
     template_name = 'TPI_Cyberparlement/cyberparlement/parlement.html'
     context_object_name = 'parlement'
     model = Cyberparlement
+    request = HttpRequest()
 
-    def get_parlementls(self):
+    def get_parlementls(self, pk):
+        self.request.session['user'] = serializers.serialize('json', pk)
         return self.model.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Koolapic'
         context['description'] = 'La liste des activités sur Koolapic'
-        context['parlements'] = self.get_parlementls()
-        context['parlements'] = self.get_parlementls()
+        context['parlements'] = self.get_parlementls(self)
         return context
 
 
@@ -70,31 +73,86 @@ def test_recursive(pk):
     return True
 
 
-class Test(DetailView):
+def gen_code():
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for i in range(8))
+    return password
+
+
+def mail_code(self, header, text, type):
+    personne = Personne.objects.filter(idpersonne=self.kwargs['pk'])
+    password = gen_code()
+    for p in personne:
+        if type == 'password':
+            p.password = None
+            p.passwordcheck = None
+            p.passwordcheck = password
+        elif type == 'mail':
+            p.mailcheck = password
+        send_mail(header,
+                  text + ' ' + password,
+                  "rossier.adrien@bluewin.ch",
+                  ['adrienmatthieu.rossier@ceff.ch'],
+                  fail_silently=False, )
+        return password
+
+
+class Password(DetailView):
     template_name = 'TPI_Cyberparlement/personne/Password.html'
     model = Personne
 
-    def mail_password(self, pk):
-        personne = Personne.objects.filter(idpersonne=self.kwargs['pk'])
-        alphabet = string.ascii_letters + string.digits
-        password = ''.join(secrets.choice(alphabet) for i in range(8))
-        for p in personne:
-            p.password = None
-            p.password_check = None
-            p.password_check = password
-            send_mail('code pour reset le passeword',
-                      f'Allez sur le lien pour réinitialiser votre password {password}',
-                      "rossier.adrien@bluewin.ch",
-                      ['adrienmatthieu.rossier@ceff.ch'],
-                      fail_silently=False, )
+    def get_context_data(self, **kwargs):
+        context = super(Password, self).get_context_data()
+        context['mail'] = mail_code(self, 'Code pour reset le password', 'Allez sur le lien pour réinitialiser votre mot de passe', 'password')
+        print(context['mail'])
+        return context
 
-            return password
+
+class MailConf(DetailView):
+    template_name = 'TPI_Cyberparlement/personne/confirmation_mail.html'
+    model = Personne
 
     def get_context_data(self, **kwargs):
-        context = super(Test, self).get_context_data()
-        context['test'] = self.mail_password(self)
-        print(context['test'])
+        context = super(MailConf, self).get_context_data()
+        context['mail'] = mail_code(self, "Code pour confirmer l'adresse mail", 'Allez sur le lien pour confirmer votre adresse mail', 'mail')
+        print(context['mail'])
         return context
+
+
+def courrier_conf(request):
+    if request.method == 'POST':
+        data = request.POST
+        print(data)
+        buffer = io.BytesIO()
+        p = canvas.Canvas(buffer)
+        p.drawString(100, 750, 'Bonjour,')
+        p.drawString(100, 705, 'Ceci est une lettre de confirmation de votre adresse postal.')
+        p.drawString(100, 690, 'Veuillez mettre le code reçu ci-dessous dans la rebrique')
+        p.drawString(100, 675, 'confirmation de courrier de votre profile')
+        p.drawString(100, 660, f"{gen_code()}")
+        p.showPage()
+        p.save()
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename='Lettre de confirmation postale.pdf')
+
+
+class LoginPage(ListView):
+    template_name = 'TPI_Cyberparlement/home.html'
+    context_object_name = 'membres'
+    model = Membrecp
+
+    def get_personne_membre(self):
+        menbre = Membrecp.objects.filter(roleCyberparlement='CyberChancelier')
+        all = []
+        for m in menbre:
+            all.append(Personne.objects.filter(idpersonne=m.personne_id))
+        return all
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['personnes'] = self.get_personne_membre()
+        return context
+
 
 
 class ModifMemberView(DetailView):
@@ -137,5 +195,8 @@ def put_personne(request):
                 p.localite = data['localite']
             if data['datenaissance']:
                 p.datenaissance = data['datenaissance']
+            for s in Statutpersonne.objects.filter(idstatut=data['statut']):
+                p.statut = s.statut
             # p.save()
+
     return HttpResponse('Modifications effectués avec succes')

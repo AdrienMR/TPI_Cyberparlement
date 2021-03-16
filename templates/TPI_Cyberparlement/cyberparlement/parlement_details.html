@@ -7,64 +7,65 @@
 {% block content %}
     {% for m in personnes %}
         {% for p in m %}
-        <table style="border-style: double">
-            <tr>
-                <td>
-                    Nom: {{ p.nom }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Prénom: {{ p.prenom }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Email: {{ p.email }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Adresse: {{ p.adresse }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    NPA: {{ p.npa }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Localité: {{ p.localite }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Date de Naissance: {{ p.datenaissance }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    No Tel: {{ p.notel }}
-                </td>
-                <td>
-                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
-                        <button>Modifier</button>
-                    </a>
-                </td>
-                <td>
-                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
-                        <button>Confirmé l'email</button>
-                    </a>
-                </td>
-                <td>
-                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
-                        <button>Confirmer code postal</button>
-                    </a>
-                </td>
-            </tr>
-        </table>
-        <br>
+            <table style="border-style: double">
+                <tr>
+                    <td>
+                        Nom: {{ p.nom }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Prénom: {{ p.prenom }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Email: {{ p.email }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Adresse: {{ p.adresse }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        NPA: {{ p.npa }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Localité: {{ p.localite }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Date de Naissance: {{ p.datenaissance }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        No Tel: {{ p.notel }}
+                    </td>
+                    <td>
+                        <a href="{% url 'modif_membre' pk=p.idpersonne %}">
+                            <button>Modifier</button>
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'mail_conf' pk=p.idpersonne %}">
+                            <button>Confirmé l'email</button>
+                        </a>
+                    </td>
+                    <td>
+                        <form method="post" name="conf_courrier" action='courrier_conf'>
+                            {% csrf_token %}
+                            <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+                            <input type="submit" value="Confirmer code postal">
+                        </form>
+                    </td>
+                </tr>
+            </table>
         {% endfor %}
     {% endfor %}
 {% endblock %}
