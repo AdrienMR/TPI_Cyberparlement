@@ -94,6 +94,19 @@
             </form>
             <tr>
                 <td>
+                    {% for c in parlement %}
+                        <form name="delete_parlement" method="post" action="confirm_delete">
+                        {% csrf_token %}
+                            {{ c.nom }}
+                            <input type="hidden" name="idparlement" id="idparlement" value="{{ c.idcyberparlement }}">
+                            <input type="hidden" name="idpersonne" id="idpersonne" value="{{ p.idpersonne }}">
+                            <input type="submit" name="delete" value="Delete">
+                        </form>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td>
                     <a href="{% url 'reset_password' pk=p.idpersonne %}">
                         <button>Réinitialiser le mot de passe</button>
                     </a>

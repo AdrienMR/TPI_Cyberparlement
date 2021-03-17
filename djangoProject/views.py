@@ -1,29 +1,61 @@
-from django.http import HttpResponse, response, request, FileResponse, HttpRequest
+import csv
+
+from django.contrib import messages
+from django.http import HttpResponse, FileResponse, HttpRequest
 import secrets
 import string
 from django.core.mail import send_mail
-from django.core import serializers
-from django.views.generic import TemplateView, ListView, DetailView
+from django.shortcuts import render
+from django.views.generic import ListView, DetailView
 import io
 from reportlab.pdfgen import canvas
 from djangoProject.models import *
+
+
+def get_parlement_recursif(pk):
+    parlement = Membrecp.objects.filter(personne=96, roleCyberparlement='CyberChancelier')
+    # parent = 0
+    # childrens = []
+    # for p in parlement:
+    #     parent = p.cyberparlement
+    # test = Cyberparlement.objects.filter(cpparent=parent.idcyberparlement)
+    # print(test)
+    # return parlement
+    childrens = []
+    for p in list(parlement.values()):
+        # print(p['cyberparlement_id'])
+        child = Cyberparlement.objects.filter(cpparent=p['cyberparlement_id'])
+        if child is not None:
+            childrens.append(child)
+            for c in list(child.values()):
+                # print(c['idcyberparlement'])
+                get_parlement_recursif(c['idcyberparlement'])
+        else:
+            print(child)
+            # return childrens
+
+    # print(child)
 
 
 class ParlementListeView(ListView):
     template_name = 'TPI_Cyberparlement/cyberparlement/parlement.html'
     context_object_name = 'parlement'
     model = Cyberparlement
-    request = HttpRequest()
 
     def get_parlementls(self, pk):
-        self.request.session['user'] = serializers.serialize('json', pk)
         return self.model.objects.all()
+
+    def set_session(self, pk):
+        self.request.session['user'] = pk
+        return pk
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Koolapic'
         context['description'] = 'La liste des activités sur Koolapic'
         context['parlements'] = self.get_parlementls(self)
+        self.set_session(pk=self.kwargs['pk'])
+        # get_parlement_recursif(self.request.session['user'])
         return context
 
 
@@ -37,40 +69,13 @@ class ParlementDetailView(DetailView):
         test = []
         for m in membre:
             test.append(Personne.objects.filter(idpersonne=m.personne_id))
-
+        print(self.request.session['user'])
         return test
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['personnes'] = self.get_personne_membre(self)
         return context
-
-
-def get_parlement_recursif(self, pk):
-    all_parlement = []
-    parlement = Cyberparlement.objects.filter(idcyberparlement=self.kwargs['pk'])
-    for p in parlement:
-        print(p.cpparent)
-        all_parlement.append(p.cpparent)
-        if p.cpparent != 1:
-            get_parlement_recursif(self, p.cpparent)
-            return all_parlement.count()
-        else:
-            break
-
-
-def test_recursive(pk):
-    all = []
-    pk = 8
-    parlement = Cyberparlement.objects.filter(idcyberparlement=pk)
-    for p in parlement:
-        if not all.__contains__(p.idcyberparlement):
-            all.append(p.idcyberparlement)
-        children = Cyberparlement.objects.filter(cpparent=p.idcyberparlement)
-        if not children:
-            for c in children:
-                test_recursive(c.idcyberparlement)
-    return True
 
 
 def gen_code():
@@ -154,7 +159,6 @@ class LoginPage(ListView):
         return context
 
 
-
 class ModifMemberView(DetailView):
     template_name = 'TPI_Cyberparlement/personne/modif_membre.html'
     model = Personne
@@ -165,13 +169,12 @@ class ModifMemberView(DetailView):
     def get_parlement(self, pk):
         membre = Membrecp.objects.filter(personne=self.kwargs['pk'])
         for m in membre:
-            print(get_parlement_recursif(self, m.cyberparlement))
-            return print()
+            return Cyberparlement.objects.filter(idcyberparlement=m.cyberparlement.idcyberparlement)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['personne'] = self.get_perdonne_by_id(self)
-        # context['parlement'] = self.get_parlement(self)
+        context['parlement'] = self.get_parlement(self)
         # context['test'] = reset_password()
         return context
 
@@ -198,5 +201,37 @@ def put_personne(request):
             for s in Statutpersonne.objects.filter(idstatut=data['statut']):
                 p.statut = s.statut
             # p.save()
-
     return HttpResponse('Modifications effectués avec succes')
+
+
+def del_parlement(request):
+    if request.method == 'POST':
+        data = request.POST
+        parlement = Membrecp.objects.filter(cyberparlement=data['idparlement'], personne=data['idpersonne'])
+        print(parlement)
+        # parlement.delete()
+    return HttpResponse(f'Suppression effectués avec succes')
+
+
+def csv_import(request):
+    template_name = 'TPI_Cyberparlement/cyberparlement/import_csv.html'
+    if request.method == 'POST':
+        data = request.FILES['file']
+
+        if not data.name.endswith('.csv'):
+            messages.error(request, 'THIS IS NOT A CSV FILE')
+
+        data_set = data.readlines()
+        for row in data_set:
+            print(str(row).split('\\'))
+        # test = csv.DictReader(data)
+        # for row in test:
+        # data_set.split(',')
+        # print(test)
+        # io_string = io.StringIO(data_set)
+        # next(io_string)
+        # csv.reader(data_set, delimiter=',', quotechar='|')
+        # for column in data_set:
+        #     print(column)
+
+        return HttpResponse(f'{row}')

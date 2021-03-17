@@ -27,4 +27,6 @@ urlpatterns = [
     path('parlement/detail/modif/reset_password/<int:pk>', views.Password.as_view(), name='reset_password'),
     path('parlement/detail/mail_conf/<int:pk>', views.MailConf.as_view(), name='mail_conf'),
     path('parlement/detail/courrier_conf', views.courrier_conf, name='courrier_conf'),
+    path('parlement/detail/modif/confirm_delete', views.del_parlement, name='confirm_delete'),
+    path('parlement/import_csv', views.csv_import, name='import_csv'),
 ]

@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 
 # Envoie des emails
 
-EMAIL_HOST = 'mail.ceff.ch'
-EMAIL_HOST_PASSWORD = ''
+# EMAIL_HOST = 'mail.ceff.ch'
+# EMAIL_HOST_PASSWORD = ''
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = 'tmp/email-messages/'
 # Application definition
