@@ -66,11 +66,21 @@ class Forum(models.Model):
 
 
 class Genrepersonne(models.Model):
-    genre = models.CharField(db_column='Genre', primary_key=True, max_length=10)  # Field name made lowercase.
+    idgenre = models.AutoField(db_column='idGenrepersonne', primary_key=True, )  # Field name made lowercase.
+    type = models.CharField(db_column='Type', max_length=200, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = True
         db_table = 'genrepersonne'
+
+
+class Statutpersonne(models.Model):
+    idstatut = models.AutoField(db_column='idStatutpersonne', primary_key=True)  # Field name made lowercase.
+    statut = models.CharField(db_column='Statut', blank=True, null=True, max_length=45)
+
+    class Meta:
+        managed = True
+        db_table = 'statutpersonne'
 
 
 class Initiative(models.Model):
@@ -124,12 +134,12 @@ class Personne(models.Model):
     idpersonne = models.AutoField(db_column='idPersonne', primary_key=True)  # Field name made lowercase.
     nom = models.CharField(db_column='Nom', max_length=45)  # Field name made lowercase.
     prenom = models.CharField(db_column='Prenom', max_length=45)  # Field name made lowercase.
-    genre = models.ForeignKey(Genrepersonne, models.DO_NOTHING, db_column='Genre', blank=True, null=True)  # Field name made lowercase.
+    genre = models.ForeignKey(Genrepersonne, models.DO_NOTHING, db_column="idgenre", blank=True, null=True)  # Field name made lowercase.
     email = models.CharField(db_column='Email', max_length=45, blank=True, null=True)  # Field name made lowercase.
     adresse = models.CharField(db_column='Adresse', max_length=45, blank=True, null=True)  # Field name made lowercase.
     npa = models.IntegerField(db_column='NPA', blank=True, null=True)  # Field name made lowercase.
     localite = models.CharField(db_column='Localite', max_length=45)  # Field name made lowercase.
-    # statut = models.ForeignKey('Statutpersonne', models.DO_NOTHING, db_column='Statut', blank=True, null=True)  # Field name made lowercase.
+    statut = models.ForeignKey(Statutpersonne, models.DO_NOTHING, db_column="idstatut", blank=True, null=True)  # Field name made lowercase.
     datenaissance = models.DateField(db_column='DateNaissance', blank=True, null=True)  # Field name made lowercase.
     notel = models.CharField(db_column='NoTel', max_length=45, blank=True, null=True)  # Field name made lowercase.
     password = models.CharField(db_column='Password', max_length=45, blank=True, null=True)  # Field name made lowercase.
@@ -165,15 +175,6 @@ class Statutinitiative(models.Model):
     class Meta:
         managed = True
         db_table = 'statutinitiative'
-
-
-class Statutpersonne(models.Model):
-    idstatut = models.AutoField(db_column='idStatutpersonne', primary_key=True)  # Field name made lowercase.
-    statut = models.CharField(db_column='Statut', blank=True, null=True, max_length=45)
-
-    class Meta:
-        managed = True
-        db_table = 'statutpersonne'
 
 
 class Voteelection(models.Model):

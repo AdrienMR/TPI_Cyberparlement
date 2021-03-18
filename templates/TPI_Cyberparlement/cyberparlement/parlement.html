@@ -15,6 +15,7 @@
             </a>
             <form action="import_csv" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
+                <input type="hidden" name="parlement" id="parlement" value="{{ parlement.pk }}">
                 <input type="file" id="file" name="file" value="Importer un fichier CSV">
                 <button type="submit">Upload</button>
             </form>

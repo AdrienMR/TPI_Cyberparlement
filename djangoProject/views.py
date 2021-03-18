@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 
 from django.contrib import messages
 from django.http import HttpResponse, FileResponse, HttpRequest
@@ -89,7 +90,7 @@ def mail_code(self, header, text, type):
     password = gen_code()
     for p in personne:
         if type == 'password':
-            p.password = None
+            p.password = password
             p.passwordcheck = None
             p.passwordcheck = password
         elif type == 'mail':
@@ -97,7 +98,7 @@ def mail_code(self, header, text, type):
         send_mail(header,
                   text + ' ' + password,
                   "rossier.adrien@bluewin.ch",
-                  ['adrienmatthieu.rossier@ceff.ch'],
+                  ['adrienmatthieu.rossier@ceff.ch', 'rossier.adrien@bluewin.ch'],
                   fail_silently=False, )
         return password
 
@@ -188,6 +189,9 @@ def put_personne(request):
                 p.nom = data['nom']
             if data['prenom']:
                 p.prenom = data['prenom']
+            # if data['genre']:
+            for s in Genrepersonne.objects.filter(idgenre=data['genre']):
+                p.genre = s.genre
             if data['email']:
                 p.email = data['email']
             if data['adresse']:
@@ -214,24 +218,33 @@ def del_parlement(request):
 
 
 def csv_import(request):
-    template_name = 'TPI_Cyberparlement/cyberparlement/import_csv.html'
     if request.method == 'POST':
         data = request.FILES['file']
-
+        personne = Personne.objects
         if not data.name.endswith('.csv'):
-            messages.error(request, 'THIS IS NOT A CSV FILE')
-
-        data_set = data.readlines()
-        for row in data_set:
-            print(str(row).split('\\'))
-        # test = csv.DictReader(data)
-        # for row in test:
-        # data_set.split(',')
-        # print(test)
-        # io_string = io.StringIO(data_set)
-        # next(io_string)
-        # csv.reader(data_set, delimiter=',', quotechar='|')
-        # for column in data_set:
-        #     print(column)
-
-        return HttpResponse(f'{row}')
+            return HttpResponse('THIS IS NOT A CSV FILE')
+        else:
+            data_set = data.read().decode('utf-8')
+            champs = []
+            csv_data = csv.reader(io.StringIO(data_set), delimiter=';')
+            for row in csv_data:
+                champs.append(row)
+                if row[0] is '' or row[1] is '' or row[6] is '':
+                    return HttpResponse(f'Les champs {champs[0][0]}, {champs[0][1]}, {champs[0][6]} doivent être obligatoirement remplis dans le fichier')
+            champs.pop(0)
+            for row in champs:
+                genre = Genrepersonne.objects.only('type').get(type=row[2])
+                statut = Statutpersonne.objects.only('statut').get(statut='Confirmé courrier')
+                personne = Personne(
+                    nom=row[0],
+                    prenom=row[1],
+                    genre=genre,
+                    email=row[3],
+                    adresse=row[4],
+                    npa=int(row[5]),
+                    localite=row[6],
+                    datenaissance=datetime.strptime(row[7], '%Y-%m-%d') if row[7] != '' else None,
+                    statut=statut
+                )
+                personne.save()
+        return HttpResponse(f'Importation faite avec succes {champs}')
