@@ -25,7 +25,7 @@
                 </tr>
                 <tr>
                     <td>
-                        Genre : {{ p.genre }}
+                        Genre : {{ p.genre.type }}
                     </td>
                     <td>
                         <select name="statut">
@@ -85,7 +85,7 @@
                 </tr>
                 <tr>
                     <td>
-                        Statut : {{ p.statut }}
+                        Statut : {{ p.statut.statut }}
                     </td>
                     <td>
                         <select name="statut">
@@ -106,6 +106,7 @@
             </form>
             <tr>
                 <td>
+                Supprimer l'utilisateur du parlement:
                     {% for c in parlement %}
                         <form name="delete_parlement" method="post" action="confirm_delete">
                         {% csrf_token %}
@@ -115,6 +116,14 @@
                             <input type="submit" name="delete" value="Delete">
                         </form>
                     {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Assigner l'utilisateur du parlement:
+                    <a href="{% url 'assigner_personne' pk=p.idpersonne %}">
+                        <button>Assigner</button>
+                    </a>
                 </td>
             </tr>
             <tr>

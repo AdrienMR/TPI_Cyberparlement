@@ -13,29 +13,15 @@ from reportlab.pdfgen import canvas
 from djangoProject.models import *
 
 
-def get_parlement_recursif(pk):
-    parlement = Membrecp.objects.filter(personne=96, roleCyberparlement='CyberChancelier')
-    # parent = 0
-    # childrens = []
-    # for p in parlement:
-    #     parent = p.cyberparlement
-    # test = Cyberparlement.objects.filter(cpparent=parent.idcyberparlement)
-    # print(test)
-    # return parlement
-    childrens = []
-    for p in list(parlement.values()):
-        # print(p['cyberparlement_id'])
-        child = Cyberparlement.objects.filter(cpparent=p['cyberparlement_id'])
-        if child is not None:
-            childrens.append(child)
-            for c in list(child.values()):
-                # print(c['idcyberparlement'])
-                get_parlement_recursif(c['idcyberparlement'])
-        else:
-            print(child)
-            # return childrens
-
-    # print(child)
+def get_parlement_recursif(pk, childrens=None):
+    if childrens is None:
+        childrens = []
+    childrens.extend(Cyberparlement.objects.filter(idcyberparlement=pk))
+    child = Cyberparlement.objects.filter(cpparent=pk)
+    if len(child):
+        for c in list(child.values()):
+            get_parlement_recursif(c['idcyberparlement'], childrens)
+    return childrens
 
 
 class ParlementListeView(ListView):
@@ -43,20 +29,21 @@ class ParlementListeView(ListView):
     context_object_name = 'parlement'
     model = Cyberparlement
 
-    def get_parlementls(self, pk):
-        return self.model.objects.all()
-
     def set_session(self, pk):
         self.request.session['user'] = pk
         return pk
 
+    def get_parlement_chancelier(self, pk):
+        membre = Membrecp.objects.only('cyberparlement_id').get(personne=pk, roleCyberparlement=1)
+        return membre.cyberparlement_id
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        self.set_session(pk=self.kwargs['pk'])
         context['title'] = 'Koolapic'
         context['description'] = 'La liste des activités sur Koolapic'
-        context['parlements'] = self.get_parlementls(self)
-        self.set_session(pk=self.kwargs['pk'])
-        # get_parlement_recursif(self.request.session['user'])
+        context['parlements'] = get_parlement_recursif(self.get_parlement_chancelier(self.request.session['user']))
+
         return context
 
 
@@ -148,7 +135,7 @@ class LoginPage(ListView):
     model = Membrecp
 
     def get_personne_membre(self):
-        menbre = Membrecp.objects.filter(roleCyberparlement='CyberChancelier')
+        menbre = Membrecp.objects.filter(roleCyberparlement=1)
         all = []
         for m in menbre:
             all.append(Personne.objects.filter(idpersonne=m.personne_id))
@@ -189,7 +176,6 @@ def put_personne(request):
                 p.nom = data['nom']
             if data['prenom']:
                 p.prenom = data['prenom']
-            # if data['genre']:
             for s in Genrepersonne.objects.filter(idgenre=data['genre']):
                 p.genre = s.genre
             if data['email']:
@@ -204,7 +190,7 @@ def put_personne(request):
                 p.datenaissance = data['datenaissance']
             for s in Statutpersonne.objects.filter(idstatut=data['statut']):
                 p.statut = s.statut
-            # p.save()
+            p.save()
     return HttpResponse('Modifications effectués avec succes')
 
 
@@ -212,8 +198,7 @@ def del_parlement(request):
     if request.method == 'POST':
         data = request.POST
         parlement = Membrecp.objects.filter(cyberparlement=data['idparlement'], personne=data['idpersonne'])
-        print(parlement)
-        # parlement.delete()
+        parlement.delete()
     return HttpResponse(f'Suppression effectués avec succes')
 
 
@@ -229,12 +214,14 @@ def csv_import(request):
             csv_data = csv.reader(io.StringIO(data_set), delimiter=';')
             for row in csv_data:
                 champs.append(row)
-                if row[0] is '' or row[1] is '' or row[6] is '':
+                if row[0] == '' or row[1] == '' or row[6] == '':
                     return HttpResponse(f'Les champs {champs[0][0]}, {champs[0][1]}, {champs[0][6]} doivent être obligatoirement remplis dans le fichier')
             champs.pop(0)
             for row in champs:
                 genre = Genrepersonne.objects.only('type').get(type=row[2])
                 statut = Statutpersonne.objects.only('statut').get(statut='Confirmé courrier')
+                parlement = Cyberparlement.objects.only('idcyberparlement').get(idcyberparlement=request.POST['parlement'])
+                rolecp = Rolemembrecp.objects.only('nom').get(nom='membre')
                 personne = Personne(
                     nom=row[0],
                     prenom=row[1],
@@ -247,4 +234,10 @@ def csv_import(request):
                     statut=statut
                 )
                 personne.save()
+                membre = Membrecp(cyberparlement=parlement, personne=Personne.objects.latest('idpersonne'), roleCyberparlement=rolecp)
+                membre.save()
         return HttpResponse(f'Importation faite avec succes {champs}')
+
+
+def assigner_personne(request):
+    return None

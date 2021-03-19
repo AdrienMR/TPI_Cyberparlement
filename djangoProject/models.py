@@ -98,6 +98,16 @@ class Initiative(models.Model):
         db_table = 'initiative'
 
 
+class Rolemembrecp(models.Model):
+    rolecp = models.AutoField(db_column='RoleCP', primary_key=True)  # Field name made lowercase.
+    nom = models.CharField(db_column='Nom', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = True
+        db_table = 'rolemembrecp'
+
+
 class Membrecp(models.Model):
     idmembrecp = models.AutoField(db_column='idMembreCP', primary_key=True)  # Field name made lowercase.
     personne = models.ForeignKey('Personne', models.DO_NOTHING, db_column='idPersonne')  # Field name made lowercase.
@@ -134,12 +144,12 @@ class Personne(models.Model):
     idpersonne = models.AutoField(db_column='idPersonne', primary_key=True)  # Field name made lowercase.
     nom = models.CharField(db_column='Nom', max_length=45)  # Field name made lowercase.
     prenom = models.CharField(db_column='Prenom', max_length=45)  # Field name made lowercase.
-    genre = models.ForeignKey(Genrepersonne, models.DO_NOTHING, db_column="idgenre", blank=True, null=True)  # Field name made lowercase.
+    genre = models.ForeignKey(Genrepersonne, models.DO_NOTHING, db_column="genre", blank=True, null=True)  # Field name made lowercase.
     email = models.CharField(db_column='Email', max_length=45, blank=True, null=True)  # Field name made lowercase.
     adresse = models.CharField(db_column='Adresse', max_length=45, blank=True, null=True)  # Field name made lowercase.
     npa = models.IntegerField(db_column='NPA', blank=True, null=True)  # Field name made lowercase.
     localite = models.CharField(db_column='Localite', max_length=45)  # Field name made lowercase.
-    statut = models.ForeignKey(Statutpersonne, models.DO_NOTHING, db_column="idstatut", blank=True, null=True)  # Field name made lowercase.
+    statut = models.ForeignKey(Statutpersonne, models.DO_NOTHING, db_column="statut", blank=True, null=True)  # Field name made lowercase.
     datenaissance = models.DateField(db_column='DateNaissance', blank=True, null=True)  # Field name made lowercase.
     notel = models.CharField(db_column='NoTel', max_length=45, blank=True, null=True)  # Field name made lowercase.
     password = models.CharField(db_column='Password', max_length=45, blank=True, null=True)  # Field name made lowercase.
@@ -150,15 +160,6 @@ class Personne(models.Model):
     class Meta:
         managed = True
         db_table = 'personne'
-
-
-class Rolemembrecp(models.Model):
-    rolecp = models.CharField(db_column='RoleCP', primary_key=True, max_length=45)  # Field name made lowercase.
-    description = models.CharField(db_column='Description', max_length=200, blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = True
-        db_table = 'rolemembrecp'
 
 
 class Statutensemble(models.Model):

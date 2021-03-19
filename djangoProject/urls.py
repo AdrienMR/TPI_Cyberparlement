@@ -28,5 +28,6 @@ urlpatterns = [
     path('parlement/detail/mail_conf/<int:pk>', views.MailConf.as_view(), name='mail_conf'),
     path('parlement/detail/courrier_conf', views.courrier_conf, name='courrier_conf'),
     path('parlement/detail/modif/confirm_delete', views.del_parlement, name='confirm_delete'),
+    path('parlement/detail/modif/assigner_personne/<int:pk>', views.assigner_personne, name='assigner_personne'),
     path('parlement/import_csv', views.csv_import, name='import_csv'),
 ]
