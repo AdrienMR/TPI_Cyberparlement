@@ -1,140 +1,143 @@
-{#{% extends 'base.html' %}#}
+{% extends 'TPI_Cyberparlement/base.html' %}
 
-<body>
+{% block content %}
 
-<div>
-    {% for p in personne %}
-        <table>
-            <form method="post" name="put_user" action="confirm_changes">
-                {% csrf_token %}
-                <tr>
+    <div class="container col-md-13">
+        {% for p in personne %}
+            <table>
+                <form method="post" name="put_user" action="confirm_changes">
+                    {% csrf_token %}
+                    <tr>
+                        <td>
+                            <h1>Nom :</h1>
+                        </td>
+                        <td>
+                            <input type="text" value="{{ p.nom }}" name="nom" id="nom">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Prénom :</h1>
+                        </td>
+                        <td>
+                            <input type="text" value="{{ p.prenom }}" name="prenom" id="prenom">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Genre : {{ p.genre.type }}</h1>
+                        </td>
+                        <td>
+                            <select name="genre" id="genre">
+                                <option value="2"></option>
+                                <option value="0">Masculin</option>
+                                <option value="1">Féminin</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Email :</h1>
+                        </td>
+                        <td>
+                            <input type="email" value="{{ p.email }}" name="email" id="email">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Adresse :</h1>
+                        </td>
+                        <td>
+                            <input type="text" value="{{ p.adresse }}" name="adresse" id="adresse">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Npa :</h1>
+                        </td>
+                        <td>
+                            <input type="number" value="{{ p.npa }}" name="npa" id="npa">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Localité :</h1>
+                        </td>
+                        <td>
+                            <input type="text" value="{{ p.localite }}" name="localite" id="localite">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Date de naissance :</h1>
+                        </td>
+                        <td>
+                            <input type="date" value="{{ p.datenaissance }}" name="datenaissance" id="datenaissance">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>No tel :</h1>
+                        </td>
+                        <td>
+                            <input type="text" value="{{ p.notel }}" name="notel" id="notel">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h1>Statut : {{ p.statut.statut }}</h1>
+                        </td>
+                        <td>
+                            <select name="statut" id="statut">
+                                <option value="3"></option>
+                                <option value="0">Confirmé courrier</option>
+                                <option value="1">Inscrit</option>
+                                <option value="2">Validé email</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+                            <input type="submit" value="Confirmer">
+                        </td>
+                    </tr>
+                </form>
+                <tr class="col-md-6">
                     <td>
-                        Nom :
+                        <h1>Supprimer l'utilisateur du parlement:</h1>
                     </td>
                     <td>
-                        <input type="text" value="{{ p.nom }}" name="nom" id="nom">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Prénom :
-                    </td>
-                    <td>
-                        <input type="text" value="{{ p.prenom }}" name="prenom" id="prenom">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Genre : {{ p.genre.type }}
-                    </td>
-                    <td>
-                        <select name="statut">
-                            <option value="3"></option>
-                            <option value="0">Masculin</option>
-                            <option value="1">Féminin</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Email :
-                    </td>
-                    <td>
-                        <input type="email" value="{{ p.email }}" name="email" id="email">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Adresse :
-                    </td>
-                    <td>
-                        <input type="text" value="{{ p.adresse }}" name="adresse" id="adresse">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Npa :
-                    </td>
-                    <td>
-                        <input type="number" value="{{ p.npa }}" name="npa" id="npa">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Localité :
-                    </td>
-                    <td>
-                        <input type="text" value="{{ p.localite }}" name="localite" id="localite">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Date de naissance :
-                    </td>
-                    <td>
-                        <input type="date" value="{{ p.datenaissance }}" name="datenaissance" id="datenaissance">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        No tel :
-                    </td>
-                    <td>
-                        <input type="text" value="{{ p.notel }}" name="notel" id="notel">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        Statut : {{ p.statut.statut }}
-                    </td>
-                    <td>
-                        <select name="statut">
-                            <option value="3"></option>
-                            <option value="0">Confirmé courrier</option>
-                            <option value="1">Inscrit</option>
-                            <option value="2">Validé email</option>
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>
-                        <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
-                        <input type="submit" value="Confirmer">
-                    </td>
-                </tr>
-            </form>
-            <tr>
-                <td>
-                Supprimer l'utilisateur du parlement:
-                    {% for c in parlement %}
                         <form name="delete_parlement" method="post" action="confirm_delete">
-                        {% csrf_token %}
-                            {{ c.nom }}
-                            <input type="hidden" name="idparlement" id="idparlement" value="{{ c.idcyberparlement }}">
-                            <input type="hidden" name="idpersonne" id="idpersonne" value="{{ p.idpersonne }}">
-                            <input type="submit" name="delete" value="Delete">
+                            {% for c in parlement %}
+                                {% csrf_token %}
+                                <h1>{{ c.nom }}</h1>
+                                <input type="hidden" name="idparlement" id="idparlement" value="{{ c.idcyberparlement }}">
+                                <input type="hidden" name="idpersonne" id="idpersonne" value="{{ p.idpersonne }}">
+                                <input type="submit" name="delete" value="Delete">
+                            {% endfor %}
                         </form>
-                    {% endfor %}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Assigner l'utilisateur du parlement:
-                    <a href="{% url 'assigner_personne' pk=p.idpersonne %}">
-                        <button>Assigner</button>
-                    </a>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <a href="{% url 'reset_password' pk=p.idpersonne %}">
-                        <button>Réinitialiser le mot de passe</button>
-                    </a>
-                </td>
-            </tr>
-        </table>
-    {% endfor %}
-</div>
-</body>
-</html>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h1>Assigner l'utilisateur au parlement:</h1>
+                    </td>
+                    <td>
+                        <a href="{% url 'assigner_personne' pk=p.idpersonne %}">
+                            <button class="btn btn-primary">Assigner</button>
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <a href="{% url 'reset_password' pk=p.idpersonne %}">
+                            <button class="btn btn-primary">Réinitialiser le mot de passe</button>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        {% endfor %}
+    </div>
+{% endblock %}

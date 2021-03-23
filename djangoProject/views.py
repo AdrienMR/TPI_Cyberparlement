@@ -13,6 +13,12 @@ from reportlab.pdfgen import canvas
 from djangoProject.models import *
 
 
+def get_parlement_chancelier(pk):
+    if not pk:
+        membre = Membrecp.objects.only('cyberparlement_id').get(personne=pk, roleCyberparlement=1)
+        return membre.cyberparlement_id
+
+
 def get_parlement_recursif(pk, childrens=None):
     if childrens is None:
         childrens = []
@@ -33,16 +39,12 @@ class ParlementListeView(ListView):
         self.request.session['user'] = pk
         return pk
 
-    def get_parlement_chancelier(self, pk):
-        membre = Membrecp.objects.only('cyberparlement_id').get(personne=pk, roleCyberparlement=1)
-        return membre.cyberparlement_id
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         self.set_session(pk=self.kwargs['pk'])
         context['title'] = 'Koolapic'
         context['description'] = 'La liste des activités sur Koolapic'
-        context['parlements'] = get_parlement_recursif(self.get_parlement_chancelier(self.request.session['user']))
+        context['parlements'] = get_parlement_recursif(get_parlement_chancelier(self.request.session['user']))
 
         return context
 
@@ -52,17 +54,18 @@ class ParlementDetailView(DetailView):
     context_object_name = 'membres'
     model = Membrecp
 
-    def get_personne_membre(self, pk):
-        membre = Membrecp.objects.filter(cyberparlement=self.kwargs['pk'])
-        test = []
-        for m in membre:
-            test.append(Personne.objects.filter(idpersonne=m.personne_id))
-        print(self.request.session['user'])
-        return test
+    def get_membres(self, pk):
+        personnes = []
+        membres = get_parlement_recursif(pk)
+        for m in membres:
+            mb = Membrecp.objects.filter(cyberparlement=m.idcyberparlement).values('personne_id')
+            for b in mb:
+                personnes.extend(Personne.objects.filter(idpersonne=b['personne_id']))
+        return personnes
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['personnes'] = self.get_personne_membre(self)
+        context['personnes'] = self.get_membres(self.kwargs['pk'])
         return context
 
 
@@ -74,6 +77,7 @@ def gen_code():
 
 def mail_code(self, header, text, type):
     personne = Personne.objects.filter(idpersonne=self.kwargs['pk'])
+    admin = Personne.objects.only('email').get(idpersonne=self.request.session['user'])
     password = gen_code()
     for p in personne:
         if type == 'password':
@@ -84,19 +88,19 @@ def mail_code(self, header, text, type):
             p.mailcheck = password
         send_mail(header,
                   text + ' ' + password,
-                  "rossier.adrien@bluewin.ch",
-                  ['adrienmatthieu.rossier@ceff.ch', 'rossier.adrien@bluewin.ch'],
+                  "noreply.cyberparlement@ceff.ch",
+                  [p.email, admin.email],
                   fail_silently=False, )
         return password
 
 
 class Password(DetailView):
-    template_name = 'TPI_Cyberparlement/personne/Password.html'
+    template_name = 'TPI_Cyberparlement/personne/confirmation_mail.html'
     model = Personne
 
     def get_context_data(self, **kwargs):
         context = super(Password, self).get_context_data()
-        context['mail'] = mail_code(self, 'Code pour reset le password', 'Allez sur le lien pour réinitialiser votre mot de passe', 'password')
+        context['mail'] = mail_code(self, 'Mot de passe temporaire', 'Ceci est un mot de passe temporaire, veuillez le changer au plus vite. Code:', 'password')
         print(context['mail'])
         return context
 
@@ -107,7 +111,7 @@ class MailConf(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(MailConf, self).get_context_data()
-        context['mail'] = mail_code(self, "Code pour confirmer l'adresse mail", 'Allez sur le lien pour confirmer votre adresse mail', 'mail')
+        context['mail'] = mail_code(self, "Code pour confirmer l'adresse mail", 'Allez sur le le site et entrez ce code confirmer votre adresse mail', 'mail')
         print(context['mail'])
         return context
 
@@ -151,19 +155,21 @@ class ModifMemberView(DetailView):
     template_name = 'TPI_Cyberparlement/personne/modif_membre.html'
     model = Personne
 
-    def get_perdonne_by_id(self, pk):
+    def get_personne_by_id(self, pk):
         return Personne.objects.filter(idpersonne=self.kwargs['pk'])
 
     def get_parlement(self, pk):
+        all = []
         membre = Membrecp.objects.filter(personne=self.kwargs['pk'])
         for m in membre:
-            return Cyberparlement.objects.filter(idcyberparlement=m.cyberparlement.idcyberparlement)
+            all.extend(Cyberparlement.objects.filter(idcyberparlement=m.cyberparlement.idcyberparlement))
+        print(all)
+        return all
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['personne'] = self.get_perdonne_by_id(self)
+        context['personne'] = self.get_personne_by_id(self)
         context['parlement'] = self.get_parlement(self)
-        # context['test'] = reset_password()
         return context
 
 
@@ -177,7 +183,7 @@ def put_personne(request):
             if data['prenom']:
                 p.prenom = data['prenom']
             for s in Genrepersonne.objects.filter(idgenre=data['genre']):
-                p.genre = s.genre
+                p.genre = Genrepersonne.objects.only('idgenre').get(idgenre=s.idgenre)
             if data['email']:
                 p.email = data['email']
             if data['adresse']:
@@ -189,9 +195,9 @@ def put_personne(request):
             if data['datenaissance']:
                 p.datenaissance = data['datenaissance']
             for s in Statutpersonne.objects.filter(idstatut=data['statut']):
-                p.statut = s.statut
-            p.save()
-    return HttpResponse('Modifications effectués avec succes')
+                p.statut = Statutpersonne.objects.only('idstatut').get(idstatut=s.idstatut)
+            # p.save()
+    return HttpResponse('<h1 class=\"center\">Modifications effectués avec succes</h1>')
 
 
 def del_parlement(request):
@@ -199,15 +205,15 @@ def del_parlement(request):
         data = request.POST
         parlement = Membrecp.objects.filter(cyberparlement=data['idparlement'], personne=data['idpersonne'])
         parlement.delete()
-    return HttpResponse(f'Suppression effectués avec succes')
+    return HttpResponse(f'<h1>Suppression effectués avec succes</h1>')
 
 
 def csv_import(request):
     if request.method == 'POST':
         data = request.FILES['file']
-        personne = Personne.objects
+        # personne = Personne.objects
         if not data.name.endswith('.csv'):
-            return HttpResponse('THIS IS NOT A CSV FILE')
+            return HttpResponse('<h1>Veuillez choisir un fichier avec l\'extension  .csv</h1>')
         else:
             data_set = data.read().decode('utf-8')
             champs = []
@@ -215,7 +221,7 @@ def csv_import(request):
             for row in csv_data:
                 champs.append(row)
                 if row[0] == '' or row[1] == '' or row[6] == '':
-                    return HttpResponse(f'Les champs {champs[0][0]}, {champs[0][1]}, {champs[0][6]} doivent être obligatoirement remplis dans le fichier')
+                    return HttpResponse(f'<h1>Les champs {champs[0][0]}, {champs[0][1]}, {champs[0][6]} doivent être obligatoirement remplis dans le fichier</h1>')
             champs.pop(0)
             for row in champs:
                 genre = Genrepersonne.objects.only('type').get(type=row[2])
@@ -233,11 +239,43 @@ def csv_import(request):
                     datenaissance=datetime.strptime(row[7], '%Y-%m-%d') if row[7] != '' else None,
                     statut=statut
                 )
-                personne.save()
+                # personne.save()
                 membre = Membrecp(cyberparlement=parlement, personne=Personne.objects.latest('idpersonne'), roleCyberparlement=rolecp)
-                membre.save()
-        return HttpResponse(f'Importation faite avec succes {champs}')
+                # membre.save()
+        return HttpResponse(f'<h1>Importation faite avec succes des perssonnes </h1> <br> {champs}')
 
 
-def assigner_personne(request):
-    return None
+class AssignerPersonne(DetailView):
+    template_name = 'TPI_Cyberparlement/personne/parlement_add.html'
+    model = Personne
+
+    def assigned_parlement(self):
+        return Membrecp.objects.only('cyberparlement').filter(personne=self.kwargs['pk'])
+
+    def test(self):
+        print(get_parlement_chancelier(self.request.session['user']))
+        parlement = get_parlement_recursif(get_parlement_chancelier(self.request.session['user']))
+        for i in parlement:
+            for a in self.assigned_parlement():
+                if i.idcyberparlement == a.cyberparlement.idcyberparlement:
+                    parlement.remove(i)
+        return parlement
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['parlement'] = self.test()
+        context['personne'] = self.kwargs['pk']
+        return context
+
+
+def confirm_add(request):
+    parlement = Cyberparlement.objects.only('idcyberparlement').get(idcyberparlement=request.POST['parlement'])
+    rolecp = Rolemembrecp.objects.only('nom').get(nom='membre')
+    personne = Personne.objects.only('idpersonne').get(idpersonne=request.POST['personne'])
+    membre = Membrecp(
+        personne=personne,
+        cyberparlement=parlement,
+        roleCyberparlement=rolecp
+    )
+    membre.save()
+    return HttpResponse('<h1>Personne Assigné avec succes</h1>')

@@ -1,26 +1,21 @@
-{#{% extends 'base.html' %}#}
-{% load bootstrap4 %}
-{% bootstrap_css %}
-{% load static %}
+{% extends 'TPI_Cyberparlement/base.html' %}
 {% block content %}
-    {#    <form method="post">{% csrf_token %}#}
+    <h1 class="container">Choisissez un parlement ou importez des membres</h1>
     {% for parlement in parlements %}
-        <div>
-            <a href="{% url 'membres_parlement' pk=parlement.idcyberparlement %}">
-                <button class="btn btn-primary">
+        <div class="container">
+            <a href="{% url 'membres_parlement' pk=parlement.idcyberparlement %}" class="col-md-6">
+                <button class="btn btn-primary col-md-3">
                     {{ parlement.nom }}
                     <br>
                     {{ parlement.description }}
                 </button>
             </a>
-            <form action="import_csv" method="POST" enctype="multipart/form-data">
+            <form class="form-actions col-md-6" action="import_csv" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <input type="hidden" name="parlement" id="parlement" value="{{ parlement.pk }}">
-                <input type="file" id="file" name="file" value="Importer un fichier CSV">
-                <button type="submit">Upload</button>
+                <input class="hidden" type="hidden" name="parlement" id="parlement" value="{{ parlement.pk }}">
+                <input class="hidden" type="file" id="file" name="file" value="Importer un fichier CSV">
+                <button class="btn btn-success" type="submit">Upload</button>
             </form>
         </div>
     {% endfor %}
-    </form>
 {% endblock %}
-</html>

@@ -67,7 +67,7 @@ class Forum(models.Model):
 
 class Genrepersonne(models.Model):
     idgenre = models.AutoField(db_column='idGenrepersonne', primary_key=True, )  # Field name made lowercase.
-    type = models.CharField(db_column='Type', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    type = models.CharField(db_column='Type', blank=True, null=True, max_length=45)  # Field name made lowercase.
 
     class Meta:
         managed = True

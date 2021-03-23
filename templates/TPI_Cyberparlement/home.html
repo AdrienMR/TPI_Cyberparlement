@@ -1,21 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-</head>
-<body>
-{% for p in personnes %}
-    {% for c in p %}
-        <a href="{% url 'parlement' pk=c.idpersonne %}">
-            <button>
-                {{ c.idpersonne }}
-                {{ c.nom }}
-                {{ c.prenom }}
-            </button>
-        </a>
-        <br>
+{% extends 'TPI_Cyberparlement/base.html' %}
+{% block content %}
+    <h1 class="container ">Choisissez un cyberchancelier</h1>
+    {% for p in personnes %}
+        {% for c in p %}
+            <div class="container">
+                <a href="{% url 'parlement' pk=c.idpersonne %}">
+                    <button class="btn btn-primary col-md-2">
+                        {{ c.nom }}
+                        {{ c.prenom }}
+                    </button>
+                </a>
+            </div>
+            <br>
+        {% endfor %}
     {% endfor %}
-{% endfor %}
-</body>
-</html>
+{% endblock %}
