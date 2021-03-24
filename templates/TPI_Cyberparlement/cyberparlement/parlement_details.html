@@ -1,73 +1,75 @@
 {% extends 'TPI_Cyberparlement/base.html' %}
 {% block content %}
     <h1 class="container">Informations détaillées des membres</h1>
-    {% for p in personnes %}
-        {% if forloop.counter|divisibleby:'3' %}
-            <div class="card-deck">
-        {% endif %}
-    <div class="card-body">
-        <table>
-            <tr>
-                <td>
-                    Nom: {{ p.nom }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Prénom: {{ p.prenom }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Email: {{ p.email }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Adresse: {{ p.adresse }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    NPA: {{ p.npa }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Localité: {{ p.localite }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Date de Naissance: {{ p.datenaissance }}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    No Tel: {{ p.notel }}
-                </td>
-                <td>
-                    <a href="{% url 'modif_membre' pk=p.idpersonne %}">
-                        <button class="btn btn-primary">Modifier</button>
-                    </a>
-                </td>
-                <td>
-                    <a href="{% url 'mail_conf' pk=p.idpersonne %}">
-                        <button class="btn btn-primary">Confirmé l'email</button>
-                    </a>
-                </td>
-                <td>
-                    <form method="post" name="conf_courrier" action='courrier_conf'>
-                        {% csrf_token %}
-                        <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
-                        <input class="btn btn-primary" type="submit" value="Confirmer code postal">
-                    </form>
-                </td>
-            </tr>
-        </table>
+    <div class="grid-container">
+        {% for p in personnes %}
+            <div class="grid-item">
+                <table>
+                    <tr>
+                        <td>
+                            Nom: {{ p.nom }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Prénom: {{ p.prenom }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Email: {{ p.email }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Adresse: {{ p.adresse }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            NPA: {{ p.npa }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Localité: {{ p.localite }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Date de Naissance: {{ p.datenaissance }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            No Tel: {{ p.notel }}
+                        </td>
+                    <tr>
+                        <td>
+                            <a href="{% url 'modif_membre' pk=p.idpersonne %}">
+                                <button class="btn btn-primary">Modifier</button>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="{% url 'mail_conf' pk=p.idpersonne %}">
+                                <button class="btn btn-primary">Confirmer l'email</button>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <form method="post" name="conf_courrier" action='courrier_conf'>
+                                {% csrf_token %}
+                                <input type="hidden" name="id" id="id" value="{{ p.idpersonne }}">
+                                <input class="btn btn-primary" type="submit" value="Confirmer code postal">
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
     </div>
-    </div>
-
-    {% endfor %}
 {% endblock %}
 </html>

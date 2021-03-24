@@ -10,12 +10,13 @@
                     {{ parlement.description }}
                 </button>
             </a>
-            <form class="form-actions col-md-6" action="import_csv" method="POST" enctype="multipart/form-data">
+            <form class="form-actions" action="import_csv" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <input class="hidden" type="hidden" name="parlement" id="parlement" value="{{ parlement.pk }}">
                 <input class="hidden" type="file" id="file" name="file" value="Importer un fichier CSV">
                 <button class="btn btn-success" type="submit">Upload</button>
             </form>
         </div>
+        <br>
     {% endfor %}
 {% endblock %}

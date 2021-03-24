@@ -1,22 +1,29 @@
 {% extends 'TPI_Cyberparlement/base.html' %}
 {% block content %}
-    {% for p in parlement %}
+    <h1 class="container">Assigner le membre à un cyberparlement</h1>
+    {% if parlement.len != 0 %}
+        {% for p in parlement %}
+            <div class="container">
+                <table>
+                    <tr>
+                        <td class="col-md-6">
+                            <h1>{{ p.nom }}</h1>
+                        </td>
+                        <td class="col-md-6">
+                            <form name="confirm_add" method="post" action="confirm_add">
+                                {% csrf_token %}
+                                <input type="hidden" name="parlement" class="parlement" value="{{ p.idcyberparlement }}">
+                                <input type="hidden" name="personne" class="personne" value="{{ personne }}">
+                                <input type="submit" name="ajouter" value="Ajouter">
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
         <div class="container">
-            <table>
-                <tr>
-                    <td class="col-md-6">
-                        <h1>{{ p.nom }}</h1>
-                    </td>
-                    <td class="col-md-6">
-                        <form name="confirm_add" method="post" action="confirm_add">
-                            {% csrf_token %}
-                            <input type="hidden" name="parlement" class="parlement" value="{{ p.idcyberparlement }}">
-                            <input type="hidden" name="personne" class="personne" value="{{ personne }}">
-                            <input type="submit" name="ajouter" value="Ajouter">
-                        </form>
-                    </td>
-                </tr>
-            </table>
+        <h1>il n'y a pas de parlement au quel vous pouvez l'assigner ce membre</h1>
         </div>
-    {% endfor %}
+    {% endif %}
 {% endblock %}

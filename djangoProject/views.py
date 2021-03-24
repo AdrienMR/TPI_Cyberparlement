@@ -1,27 +1,24 @@
 import csv
 from datetime import datetime
 
-from django.contrib import messages
-from django.http import HttpResponse, FileResponse, HttpRequest
+from django.http import HttpResponse, FileResponse
 import secrets
 import string
 from django.core.mail import send_mail
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 import io
 from reportlab.pdfgen import canvas
 from djangoProject.models import *
 
-# retourne tout les enfants d'un cyberparlement 
+# retourne l'id du parlement d'ont
+# l'id donné est cyberchancelier
+def get_parlement_chancelier(pk):
+    membre = Membrecp.objects.only('cyberparlement').get(personne=pk, roleCyberparlement=1)
+    return membre.cyberparlement_id
+
+# retourne tout les enfants d'un cyberparlement
 # de manière récursive dans une liste
 # d'après un id de cyberparlement donné
-
-def get_parlement_chancelier(pk):
-    if not pk:
-        membre = Membrecp.objects.only('cyberparlement_id').get(personne=pk, roleCyberparlement=1)
-        return membre.cyberparlement_id
-
-
 def get_parlement_recursif(pk, childrens=None):
     if childrens is None:
         childrens = []
@@ -32,7 +29,8 @@ def get_parlement_recursif(pk, childrens=None):
             get_parlement_recursif(c['idcyberparlement'], childrens)
     return childrens
 
-# class qui affiche les données pour 
+
+# class qui affiche les données pour
 # la template parlement.html, elle affiche 
 # une liste de cyberparlements 
 class ParlementListeView(ListView):
@@ -62,10 +60,11 @@ class ParlementListeView(ListView):
         self.set_session(pk=self.kwargs['pk'])
         # met dans le context la liste des parlement et leurs enfants
         context['parlements'] = get_parlement_recursif(self.get_parlement_chancelier(self.request.session['user']))
-
+        print(self.request.session['user'])
         return context
 
-# class qui affiche les données: 
+
+# class qui affiche les données:
 # la template parlement_details.html, ces données sont 
 # une liste de personnes
 class ParlementDetailView(DetailView):
@@ -91,11 +90,13 @@ class ParlementDetailView(DetailView):
         context['personnes'] = self.get_membres(self.kwargs['pk'])
         return context
 
+
 # gènere un code à 8 chiffres et lettres
 def gen_code():
     alphabet = string.ascii_letters + string.digits
     password = ''.join(secrets.choice(alphabet) for i in range(8))
     return password
+
 
 # méthode qui crée et envoie les mails avec les paramètres
 # header / text / type
@@ -117,6 +118,7 @@ def mail_code(self, header, text, type):
                   fail_silently=False, )
         return password
 
+
 # class qui donne les informations pour l'envoie
 # de mail pour réinitialiser le mdp
 class Password(DetailView):
@@ -126,9 +128,9 @@ class Password(DetailView):
     # met dans le context les infrmationd pour le mail
     def get_context_data(self, **kwargs):
         context = super(Password, self).get_context_data()
-        context['mail'] = mail_code(self, 'Code pour reset le password', 'Allez sur le lien pour réinitialiser votre mot de passe', 'password')
-#         print(context['mail'])
+        context['mail'] = mail_code(self, 'Code pour reset le password', 'Veuillez réinitialiser votre mot de passe, un mot de passe temporaire vous à été assigner \nvoici votre code:', 'password')
         return context
+
 
 # class qui donne les informations pour l'envoie
 # de mail util à réinitialisation du mdp
@@ -139,16 +141,16 @@ class MailConf(DetailView):
     # met dans le context les informations- pour le mail
     def get_context_data(self, **kwargs):
         context = super(MailConf, self).get_context_data()
-        context['mail'] = mail_code(self, "Code pour confirmer l'adresse mail", 'Allez sur le lien pour confirmer votre adresse mail', 'mail')
-#         print(context['mail'])
+        context['mail'] = mail_code(self, "Code pour confirmer l'adresse mail", 'Veuillez entrer le code reçu dans la rebrique \'confirmation d\'email\' \nqui se trouve dans votre profile \nvoici votre code:', 'mail')
         return context
 
-# méthode qui génère un pdf pour la confirmation de courrier
+
+# méthode qui génère un pdf pour la confirmation de courrie
 # TODO: sujet à améliorations
 def courrier_conf(request):
     if request.method == 'POST':
         data = request.POST
-        print(data)
+        # print(data)
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer)
         p.drawString(100, 750, 'Bonjour,')
@@ -164,16 +166,16 @@ def courrier_conf(request):
 
 # class qui affiche les données pour la template
 # home.html et affiche la liste de tout les cyberchanceliers
-class LoginPage(ListView):
-    template_name = 'TPI_Cyberparlement/home.html'
+class HomePage(ListView):
+    template_name = 'TPI_Cyberparlement/cyberparlement/home.html'
     context_object_name = 'membres'
     model = Membrecp
 
     # méthode qui retourne la liste des membres qui dont cyberchancelier
     def get_personne_membre(self):
-        menbre = Membrecp.objects.filter(roleCyberparlement=1)
+        membre = Membrecp.objects.filter(roleCyberparlement=1)
         all = []
-        for m in menbre:
+        for m in membre:
             all.append(Personne.objects.filter(idpersonne=m.personne_id))
         return all
 
@@ -182,6 +184,7 @@ class LoginPage(ListView):
         context = super().get_context_data(**kwargs)
         context['personnes'] = self.get_personne_membre()
         return context
+
 
 # class qui affiche les données pour la template
 # modif_membre.html eet ces données sont:
@@ -200,15 +203,16 @@ class ModifMemberView(DetailView):
         membre = Membrecp.objects.filter(personne=self.kwargs['pk'])
         for m in membre:
             all.extend(Cyberparlement.objects.filter(idcyberparlement=m.cyberparlement.idcyberparlement))
-        print(all)
         return all
 
     # met dans le context une personne et un cyberparlement
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['personne'] = self.get_personne_by_id(self)
+        # print(self.get_personne_by_id(self).values())
         context['parlement'] = self.get_parlement(self)
         return context
+
 
 # méthode qui modifie une personne
 # avec les données reçu dans le post
@@ -236,8 +240,9 @@ def put_personne(request):
                 p.datenaissance = data['datenaissance']
             for s in Statutpersonne.objects.filter(idstatut=data['statut']):
                 p.statut = Statutpersonne.objects.only('idstatut').get(idstatut=s.idstatut)
-            # p.save()
+            p.save()
     return HttpResponse('<h1 class=\"center\">Modifications effectués avec succes</h1>')
+
 
 # méthode qui supprime un cyberparlement
 # d'après les données reçu en post
@@ -248,6 +253,7 @@ def del_parlement(request):
         parlement = Membrecp.objects.filter(cyberparlement=data['idparlement'], personne=data['idpersonne'])
         parlement.delete()
     return HttpResponse(f'<h1>Suppression effectués avec succes</h1>')
+
 
 # méthode qui crée des membres d'un cyberparlement
 # à partir d'un fichier csv
@@ -289,35 +295,42 @@ def csv_import(request):
                     datenaissance=datetime.strptime(row[7], '%Y-%m-%d') if row[7] != '' else None,
                     statut=statut
                 )
+                personne.save()
                 # crée la relation entre une personne et un cyberparlement
                 membre = Membrecp(cyberparlement=parlement, personne=Personne.objects.latest('idpersonne'), roleCyberparlement=rolecp)
-                # membre.save()
+                membre.save()
         return HttpResponse(f'<h1>Importation faite avec succes des perssonnes </h1> <br> {champs}')
+
 
 # méthode qui assigne une personne à un cyberparlement
 class AssignerPersonne(DetailView):
     template_name = 'TPI_Cyberparlement/personne/parlement_add.html'
     model = Personne
 
+    # retourne tout les parlement d'ont
+    # l'utilisateur est membre
     def assigned_parlement(self):
         return Membrecp.objects.only('cyberparlement').filter(personne=self.kwargs['pk'])
 
-    def test(self):
-        print(get_parlement_chancelier(self.request.session['user']))
+    # fait le tei avec tout les cyberparlements
+    # et retourne que ceux auquel il n'est pas assigné
+    def tri(self):
         parlement = get_parlement_recursif(get_parlement_chancelier(self.request.session['user']))
         for i in parlement:
             for a in self.assigned_parlement():
                 if i.idcyberparlement == a.cyberparlement.idcyberparlement:
                     parlement.remove(i)
-        return parlement
+        if parlement:
+            return parlement
 
+    # met dans le context une personne et une liste de cyberparlement
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['parlement'] = self.test()
+        context['parlement'] = self.tri()
         context['personne'] = self.kwargs['pk']
         return context
 
-
+# ajoute un utilisateur en tant que membre d'un cyberparlement
 def confirm_add(request):
     parlement = Cyberparlement.objects.only('idcyberparlement').get(idcyberparlement=request.POST['parlement'])
     rolecp = Rolemembrecp.objects.only('nom').get(nom='membre')
