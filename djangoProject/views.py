@@ -60,7 +60,7 @@ class ParlementListeView(ListView):
         self.set_session(pk=self.kwargs['pk'])
         # met dans le context la liste des parlement et leurs enfants
         context['parlements'] = get_parlement_recursif(self.get_parlement_chancelier(self.request.session['user']))
-        print(self.request.session['user'])
+        # print(self.request.session['user'])
         return context
 
 
@@ -128,7 +128,7 @@ class Password(DetailView):
     # met dans le context les infrmationd pour le mail
     def get_context_data(self, **kwargs):
         context = super(Password, self).get_context_data()
-        context['mail'] = mail_code(self, 'Code pour reset le password', 'Veuillez réinitialiser votre mot de passe, un mot de passe temporaire vous à été assigner \nvoici votre code:', 'password')
+        context['mail'] = mail_code(self, 'Code pour reset le password', 'Veuillez réinitialiser votre mot de passe, un mot de passe temporaire vous a été assigner \nvoici votre code:', 'password')
         return context
 
 
