@@ -10,8 +10,8 @@ import io
 from reportlab.pdfgen import canvas
 from djangoProject.models import *
 
-# retourne l'id du parlement d'ont
-# l'id donné est cyberchancelier
+# retourne l'id du cyberparlement d'ont
+# le cyberchancelier est administrateur
 def get_parlement_chancelier(pk):
     membre = Membrecp.objects.only('cyberparlement').get(personne=pk, roleCyberparlement=1)
     return membre.cyberparlement_id
@@ -45,22 +45,15 @@ class ParlementListeView(ListView):
         self.request.session['user'] = pk
         return pk
 
-    # retourne l'id du cyberparlement d'ont
-    # le cyberchancelier est administrateur
-    def get_parlement_chancelier(self, pk):
-        membre = Membrecp.objects.only('cyberparlement_id').get(personne=pk, roleCyberparlement=1)
-        return membre.cyberparlement_id
-
     # cette méthode est appelée à chaques fois 
-    # qu'une vie basé sur une calss est faite
+    # qu'une view- basé sur une calss est faite
     # et met les données dans le contexte
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # met dans la session l'id reçu dans la page précédente
         self.set_session(pk=self.kwargs['pk'])
         # met dans le context la liste des parlement et leurs enfants
-        context['parlements'] = get_parlement_recursif(self.get_parlement_chancelier(self.request.session['user']))
-        # print(self.request.session['user'])
+        context['parlements'] = get_parlement_recursif(get_parlement_chancelier(self.request.session['user']))
         return context
 
 
